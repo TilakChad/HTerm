@@ -66,8 +66,6 @@ instance Show Keys where
 clearTerminal :: IO ()
 clearTerminal = return ()
 
-
-
 drawLayout :: String -> String -> IO ()
 drawLayout path _ = do
   clearTerminal
@@ -88,3 +86,23 @@ executionMap = Map.fromList (zip extension program)
 
 argMap :: Map.Map String [String]
 argMap = Map.fromList (zip program args)
+
+
+data CursorControl = CursorLeft | CursorRight | CursorUp | CursorDown
+
+data CursorShape = BlinkBlock | SteadyBlock | BlinkUnderline | SteadyUnderLine | BlinkBar | SteadyBar | CursorDefault
+
+instance Show CursorShape where
+  show BlinkBlock       = "\ESC[1 q"
+  show SteadyBlock      = "\ESC[2 q"
+  show BlinkUnderline   = "\ESC[3 q"
+  show SteadyUnderLine  = "\ESC[4 q"
+  show BlinkBar         = "\ESC[5 q"
+  show SteadyBar        = "\ESC[6 q"
+  show _                = "\ESC[0 q"
+
+changeCursor :: CursorShape -> IO ()
+changeCursor cs = putStr $ show cs
+
+moveCursorBack :: Int -> IO ()
+moveCursorBack n = putStr $ "\ESC[" ++ show n ++ "D"

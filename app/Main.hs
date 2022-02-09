@@ -3,22 +3,18 @@ module Main where
 import Find as F
 import qualified Terminal as Term
 import qualified Glob as GlobPattern
-
-import Control.Concurrent
 import qualified FileMatch as FMatch
 import qualified Data.List as DL
-import Control.Monad
-import System.IO
-import System.Process
-import Data.List
 import qualified Glob
-import Data.Map as Map(keys,lookup)
--- If going for a fuzzy terminal searching, or just as a regular ls thingy
--- It must create some type of virtual environment firt I guess, and when it exit, terminal must switch to its directory
 
+import Control.Concurrent
+import Control.Monad
+import System.Process
+import System.IO
+import Data.List
+import Data.Map as Map(keys,lookup)
 
 data Content     = File String | Folder String | Empty
-
 
 readKey :: IO [Char]
 readKey = reverse <$> readKey' ""
@@ -35,21 +31,12 @@ readKey = reverse <$> readKey' ""
 
 main :: IO ()
 main = do
-  -- args <- Env.getArgs
-  -- if null args then
-  --   putStrLn "No source files provided"
-  --   else
-  --   listRecursively (head args)
-  -- Lets try creating some kind of virtual environment where we will be in total control of the terminal
-  -- color check
   -- Let use haskell lazyness for reading keyevents
   hSetBuffering stdin  NoBuffering
   hSetBuffering stdout NoBuffering
   hSetEcho stdin False
 
   -- Virtual Environment
-  -- Lets try working with typeclasses
-  -- lets try reading arrow keys
   -- get key asynchronously and try to interpret it, right...
 
 
@@ -58,6 +45,7 @@ main = do
   Term.drawLayout currentPath ""
 
   -- start of the infinite loop .. Don't know how to quit this loop yet .. but
+  Term.changeCursor Term.SteadyBar
   renderTerminal currentPath "" True
 
 update :: String -> Char -> String
@@ -71,10 +59,6 @@ findmatch path buffer = do
             let ffound = filter (`GlobPattern.globmatch` (buffer ++ "*")) files
             let dfound = filter (`GlobPattern.globmatch` (buffer ++ "*")) dirs
 
-            -- mapM_ (putStrLn . Term.putString Term.Blue) $ filter (`GlobPattern.globmatch` (buffer++"*")) files
-            -- mapM_ (putStrLn . Term.putString Term.Red)  $ filter (`GlobPattern.globmatch` (buffer++"*")) dirs
-
-
             return $ if null ffound && null dfound then Empty
                      else
                      if null ffound then
@@ -82,25 +66,27 @@ findmatch path buffer = do
                        else
                        File $ head ffound
 
-listContents :: String -> String -> IO ()
+
+listContents :: String -> String -> IO String
 listContents path buffer = do
                         let word = words buffer
-                        if length word > 1 then
-                          if head word == "list" then
+                        if length word > 1 && head word == "list" then
+                          do
                             FMatch.lsh (word !! 1) path
-                            else
-                            listFilesFolders path
+                            return ""
                           else
-                          listFilesFolders path
+                          do
+                            listFilesFolders path
+                            return buffer
                         
 
 tabAction :: String -> String -> Content -> IO ()
 tabAction path buffer Empty = do
                             -- before that, see if it matches list command
                             putStrLn ""
-                            listContents path buffer
+                            nbuffer <- listContents path buffer
                             -- listFilesFolders path
-                            renderTerminal path buffer True
+                            renderTerminal path nbuffer True
 
 tabAction path _ (File file) = do
                             putStrLn $ "\nExecuting file " ++ file -- TODO :: Execute the file
@@ -186,8 +172,8 @@ renderTerminal path buffer bRender = do
 
 renderResult :: String -> Content -> IO ()
 renderResult _             Empty = return ()
-renderResult buffer (File str)   = putStr . Term.putString Term.Cyan $ str DL.\\ buffer
-renderResult buffer (Folder str) = putStr . Term.putString Term.Cyan $ str DL.\\ buffer
+renderResult buffer (File str)   = (putStr . Term.putString Term.Cyan $ str DL.\\ buffer)  >> Term.moveCursorBack (length $ str DL.\\ buffer)
+renderResult buffer (Folder str) = (putStr . Term.putString Term.Cyan $ str DL.\\ buffer)  >> Term.moveCursorBack (length $ str DL.\\ buffer)
 
 
 renderSearch :: FilePath -> String -> IO Content
