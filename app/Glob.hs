@@ -103,8 +103,3 @@ findStringUntil x  (y:ys) | x == y    = ([],ys) --In case only one character mat
                             let (a,b) = findStringUntil x ys
                             in
                                 (y:a,b)
-
-
--- TODO :: Combine directory listing with this glob searching and replace find :D
--- TODO :: Now me work on some rendering and c++ stuffs
--- TODO :: Rust ni pugyo, haskell ni pugyo aajalai

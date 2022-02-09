@@ -69,7 +69,7 @@ clearTerminal = return ()
 
 
 drawLayout :: String -> String -> IO ()
-drawLayout path buffer = do
+drawLayout path _ = do
   clearTerminal
   putStr (putString Green path)
 
@@ -80,8 +80,11 @@ extension = [["c","cpp","hs","rs","txt"],["png","jpg","jpeg"], ["pdf"], ["html",
 program :: [String]
 program = ["emacs", "eog", "evince", "google-chrome"]
 
-executorMap :: [[String]] -> [String] -> Map.Map [String] String
-executorMap extension program = Map.fromList (zip extension program)
+args :: [[String]]
+args = [["-nw"],[],[],[],[]]
 
 executionMap :: Map.Map [String] String
-executionMap = executorMap extension program
+executionMap = Map.fromList (zip extension program)
+
+argMap :: Map.Map String [String]
+argMap = Map.fromList (zip program args)

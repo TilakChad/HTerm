@@ -82,10 +82,24 @@ findmatch path buffer = do
                        else
                        File $ head ffound
 
+listContents :: String -> String -> IO ()
+listContents path buffer = do
+                        let word = words buffer
+                        if length word > 1 then
+                          if head word == "list" then
+                            FMatch.lsh (word !! 1) path
+                            else
+                            listFilesFolders path
+                          else
+                          listFilesFolders path
+                        
+
 tabAction :: String -> String -> Content -> IO ()
 tabAction path buffer Empty = do
+                            -- before that, see if it matches list command
                             putStrLn ""
-                            listFilesFolders path
+                            listContents path buffer
+                            -- listFilesFolders path
                             renderTerminal path buffer True
 
 tabAction path _ (File file) = do
@@ -108,14 +122,19 @@ tabAction path _ (Folder folder) = -- change the directory
                                 renderTerminal (path ++ folder ++ "/") "" True
 
 processAction :: [[String]] -> String -> IO ()
-processAction  []    _    = putStrLn "No program to execute such file"
+processAction  []    _   = putStrLn "No program to execute such file"
+
 processAction (x:_) file = execute (Map.lookup x Term.executionMap)
                             where
                               execute Nothing        = putStrLn "No program to execute such file"
                               execute (Just program) = do
-                                                  (_,_,_,handle) <- createProcess (proc program [file])
+                                                  let argsLook = Map.lookup program Term.argMap
+                                                  (_,_,_,handle) <- createProcess (proc program $ programArgs argsLook ++ [file])
                                                   _ <- waitForProcess handle
                                                   return ()
+programArgs :: Maybe [String] -> [String]
+programArgs Nothing  = []
+programArgs (Just a) = a
 
 parentPath :: String -> String
 parentPath path = mconcat (mappend strs ["/"])

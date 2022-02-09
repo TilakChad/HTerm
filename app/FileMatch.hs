@@ -11,7 +11,7 @@ import Control.Monad
 import Control.Applicative
 
 import Glob
-
+import Terminal as Term
 -- returns content of the given directory
 listmatch :: String -> IO [String]
 listmatch "~" = do
@@ -42,7 +42,7 @@ filematch' pat = filter (`fmatch` pat)
 lsh :: String -> FilePath -> IO ()
 lsh pattern path = do
   file <- filematch pattern path
-  mapM_ putStrLn file
+  mapM_ (putStrLn . Term.putString Term.Green) file
 
 
 interpretPath :: String -> IO String
