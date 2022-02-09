@@ -47,6 +47,7 @@ main = do
   -- start of the infinite loop .. Don't know how to quit this loop yet .. but
   Term.changeCursor Term.SteadyBar
   renderTerminal currentPath "" True
+  Term.changeCursor Term.CursorDefault
 
 update :: String -> Char -> String
 update acc ch = acc ++ [ch]

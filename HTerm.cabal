@@ -21,7 +21,7 @@ maintainer:         Tilak Chad
 -- category:
 extra-source-files: CHANGELOG.md
 
-executable GlobRegex
+executable HTerm 
 --    ghc-options:     -Wall
     main-is:          Main.hs
 
