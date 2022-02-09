@@ -2,6 +2,7 @@
 module Terminal where
 
 import Prelude hiding (Left,Right)
+import qualified Data.Map as Map
 
 -- Only for linux now
 data Color = Default
@@ -71,3 +72,16 @@ drawLayout :: String -> String -> IO ()
 drawLayout path buffer = do
   clearTerminal
   putStr (putString Green path)
+
+extension :: [[String]]
+-- ig, at this point, it would be simple to use plain array
+extension = [["c","cpp","hs","rs","txt"],["png","jpg","jpeg"], ["pdf"], ["html","js","css"]]
+
+program :: [String]
+program = ["emacs", "eog", "evince", "google-chrome"]
+
+executorMap :: [[String]] -> [String] -> Map.Map [String] String
+executorMap extension program = Map.fromList (zip extension program)
+
+executionMap :: Map.Map [String] String
+executionMap = executorMap extension program

@@ -43,3 +43,25 @@ lsh :: String -> FilePath -> IO ()
 lsh pattern path = do
   file <- filematch pattern path
   mapM_ putStrLn file
+
+
+interpretPath :: String -> IO String
+interpretPath path = do
+                  home <- getHomeDirectory
+                  -- noice, check prefix using our string matching function here
+                  return (Glob.substrmatchLeft home path)
+                    -- Replace that substring by ~
+
+-- cat,mat,bat,rat,sat
+splitOnChar :: Char -> String -> [String]
+splitOnChar ch str = splitIt ch str
+                    where
+                      splitIt _ []   = []
+                      splitIt ch str =
+                        let
+                          mem = takeWhile (/= ch) str
+                        in
+                          mem : splitIt ch (drop (length mem + 1) str)
+
+homeDir :: IO String
+homeDir = getHomeDirectory

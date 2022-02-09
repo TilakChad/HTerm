@@ -9,9 +9,15 @@
 module Glob where
 
 -- guess, I should first implement KMP pattern matchng algorithm or maybe not yet
+substrmatchLeft :: String -> String -> String
+substrmatchLeft substr str = if globmatch str (substr ++ "*") then
+                                drop (length substr) str
+                               else
+                                str
 
-simplematch :: String -> String -> Bool
-simplematch str pattern =
+  
+globmatch :: String -> String -> Bool
+globmatch str pattern =
   fnmatch str pattern
   where
     fnmatch [] []    = True
@@ -29,7 +35,7 @@ simplematch str pattern =
 anymatch :: String -> String -> Bool
 anymatch str []         = True
 anymatch []  pat        = False
-anymatch (x:xs) (y:ys)  | x == y    = simplematch xs ys
+anymatch (x:xs) (y:ys)  | x == y    = globmatch xs ys
                         | otherwise = anymatch xs (y:ys)
 
 -- Check recursive suffix function
@@ -53,11 +59,12 @@ matchclass (x:xs) pat =
   --   -- Below two cases won't likely to occur
   --   ormatch [] []           = (False,[])
   --   ormatch [] xs           = (False,[])
+
   --  Another implementation of the above matchclass function
   -- Since only one character is supposed to be match or not match, we can simplify it to
   let (c,d) = (classmatch (x:xs) pat) x
   in
-    c && simplematch xs d
+    c && globmatch xs d
 
 -- --            Internal parameters
 rangematch :: Int -> Int -> String -> Char -> (Bool,String)
@@ -96,3 +103,8 @@ findStringUntil x  (y:ys) | x == y    = ([],ys) --In case only one character mat
                             let (a,b) = findStringUntil x ys
                             in
                                 (y:a,b)
+
+
+-- TODO :: Combine directory listing with this glob searching and replace find :D
+-- TODO :: Now me work on some rendering and c++ stuffs
+-- TODO :: Rust ni pugyo, haskell ni pugyo aajalai
